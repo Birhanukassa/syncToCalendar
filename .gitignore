@@ -1,4 +1,15 @@
-node_modules
-appsscript.json
+# Dependencies
+/node_modules
+
+# clasp credentials and state
 .clasp.json
+.clasp.run.json
+
+# Build output
+appsscript.json
+
+# Other
 package-lock.json
+.env
+.DS_Store
+Thumbs.db
