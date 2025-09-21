@@ -1,0 +1,4 @@
+node_modules
+appsscript.json
+.clasp.json
+package-lock.json
