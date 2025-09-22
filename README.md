@@ -5,7 +5,7 @@
 
 # Google Calendar Sync Script
 
-This Google Apps Script project automatically syncs data from various third-party services (like Toggl for time tracking and Google Fit for health metrics) to your Google Calendar. It creates and updates calendar events, providing a unified view of your activities.
+This project automatically syncs data from various third-party services (like Toggl for time tracking and Google Fit for health metrics) to your Google Calendar. It creates and updates calendar events, providing a unified view of your activities.
 
 ## Features
 
