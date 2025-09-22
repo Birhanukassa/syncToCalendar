@@ -1,4 +1,4 @@
-[[<img width="1024" height="1024" alt="sync app logo Gemini_Generated_Image_52jmn352jmn352jm" src="https://github.com/user-attachments/assets/28cb9449-a40b-4964-b3b4-87b1b7180a18" />
+<img width="1024" height="1024" alt="sync app logo Gemini_Generated_Image_52jmn352jmn352jm" src="https://github.com/user-attachments/assets/28cb9449-a40b-4964-b3b4-87b1b7180a18" />
 
 
 
