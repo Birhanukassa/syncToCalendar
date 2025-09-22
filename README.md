@@ -1,3 +1,8 @@
+[[<img width="1024" height="1024" alt="sync app logo Gemini_Generated_Image_52jmn352jmn352jm" src="https://github.com/user-attachments/assets/28cb9449-a40b-4964-b3b4-87b1b7180a18" />
+
+
+
+
 # Google Calendar Sync Script
 
 This Google Apps Script project automatically syncs data from various third-party services (like Toggl for time tracking and Google Fit for health metrics) to your Google Calendar. It creates and updates calendar events, providing a unified view of your activities.
