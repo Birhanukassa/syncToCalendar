@@ -1,4 +1,4 @@
 function runTests() {
-  QUnit.load(runMyTests);
-  QUnit.run();
+    QUnit.load(runMyTests);
+    QUnit.run();
 }
