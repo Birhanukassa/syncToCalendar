@@ -2,6 +2,8 @@ import js from "@eslint/js";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 import { defineConfig } from "eslint/config";
+import prettier from "eslint-config-prettier";
+import prettierPlugin from "eslint-plugin-prettier";
 
 export default defineConfig([
   {
@@ -16,12 +18,14 @@ export default defineConfig([
     files: ["src/**/*.{js,mjs,cjs,ts,mts,cts}"],
     plugins: {
       "@typescript-eslint": tseslint.plugin,
+      prettier: prettierPlugin,
     },
     rules: {
       "@typescript-eslint/no-unused-vars": [
         "warn", // Use "warn" instead of "error" for unused vars
         { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" },
       ],
+      "prettier/prettier": "error",
     },
     languageOptions: {
       globals: {
@@ -58,4 +62,6 @@ export default defineConfig([
       "no-prototype-builtins": "off",
     },
   },
+  // Prettier configuration (must be last)
+  prettier,
 ]);

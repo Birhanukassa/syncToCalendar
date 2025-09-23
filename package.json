@@ -1,15 +1,52 @@
 {
-  "name": "synctocalendar",
+  "name": "google-calendar-sync",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "Professional Google Apps Script for syncing Toggl time tracking and Google Fit data to Google Calendar with enterprise-grade error handling and performance monitoring",
+  "main": "src/Main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint src/"
+    "test": "npm run test:node",
+    "test:node": "node src/Main.test.js",
+    "test:unit": "node src/testRunner.js",
+    "test:coverage": "jest --coverage",
+    "test:watch": "jest --watch",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "format": "prettier --write \"src/**/*.{js,json,md}\"",
+    "format:check": "prettier --check \"src/**/*.{js,json,md}\"",
+    "start": "node src/Main.js",
+    "dev": "node --watch src/Main.js",
+    "validate": "npm run lint && npm run format:check && npm run test",
+    "precommit": "npm run validate",
+    "audit": "npm audit --audit-level=moderate",
+    "audit:fix": "npm audit fix",
+    "clean": "rm -rf node_modules package-lock.json && npm install",
+    "build": "npm run validate",
+    "deploy": "clasp push",
+    "logs": "clasp logs"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "keywords": [
+    "google-apps-script",
+    "google-calendar",
+    "toggl",
+    "google-fit",
+    "time-tracking",
+    "calendar-sync",
+    "automation",
+    "productivity"
+  ],
+  "author": {
+    "name": "Birhanu",
+    "email": "hirutbelhu@gmail.com"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/google-calendar-sync.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/google-calendar-sync/issues"
+  },
+  "homepage": "https://github.com/yourusername/google-calendar-sync#readme",
   "devDependencies": {
     "eslint": "^9.36.0",
     "eslint-plugin-googleappsscript": "^1.0.5",
