@@ -1,3 +1,5 @@
+// force redeploy
+
 /**
  * ========================================================================
  * Main Entry Point
@@ -48,3 +50,18 @@ function syncAllSources() {
 if (typeof require !== 'undefined' && require.main === module) {
     syncAllSources();
 }
+
+// function doGet(e) {
+//   return HtmlService.createHtmlOutputFromFile('ConfigDashboard');
+// }
+
+
+//============
+
+// function showSidebar() {
+//   const html = HtmlService.createHtmlOutputFromFile('Sidebar')
+//     .setTitle('Calendar Setup')
+//     .setWidth(300);
+//   SpreadsheetApp.getUi().showSidebar(html); // Or DocumentApp.getUi() if you're in Docs
+// }
+

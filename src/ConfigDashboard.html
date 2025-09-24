@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <style>
+      body { font-family: Arial, sans-serif; padding: 10px; }
+      input, button { margin: 5px 0; width: 100%; }
+      label { font-weight: bold; margin-top: 10px; display: block; }
+    </style>
+  </head>
+  <body>
+    <h2>🛠️ Config Dashboard</h2>
+    <div>
+    <button onclick="showTab('calendar')">📅 Calendar</button>
+    <button onclick="showTab('toggl')">⏱️ Toggl</button>
+    <button onclick="showTab('fit')">🏃 Google Fit</button>
+    </div>
+    <div id="configArea"></div>
+
+    <script>
+      google.script.run.withSuccessHandler(renderConfig).getAllProperties();
+
+      function renderConfig(props) {
+          window.configProps = props;
+          document.getElementById('envInfo').innerHTML = `
+            <p><strong>Environment:</strong> ${props.ENVIRONMENT}</p>
+            <p><strong>User:</strong> ${props.USER_EMAIL}</p>
+          `;
+          showTab('calendar');
+    }
+
+
+      function showTab(tab) {
+        const container = document.getElementById('configArea');
+        container.innerHTML = '';
+        const keys = Object.keys(window.configProps);
+        const filtered = keys.filter(k => {
+          if (tab === 'calendar') return k.includes('CALENDAR') || k.includes('ERROR') || k === 'DRY_RUN';
+          if (tab === 'toggl') return k.includes('TOGGL');
+          if (tab === 'fit') return k.includes('FIT');
+          return true;
+        });
+
+        filtered.forEach(key => {
+          const value = window.configProps[key];
+          container.innerHTML += `
+            <label for="${key}">${key}</label>
+            <input type="text" id="${key}" value="${value}">
+          `;
+        });
+
+        container.innerHTML += `<button onclick="saveConfig()">💾 Save Changes</button>`;
+        container.innerHTML += `<button onclick="resetDefaults()">🔁 Reset to Defaults</button>`;
+      }
+
+
+      function saveConfig() {
+        const inputs = document.querySelectorAll('input');
+        const updated = {};
+        inputs.forEach(input => {
+          updated[input.id] = input.value;
+        });
+
+        // Validate calendar ID before saving
+        if (updated.CALENDAR_ID) {
+          google.script.run.withSuccessHandler(isValid => {
+            if (!isValid) {
+              alert('❌ Invalid Calendar ID. Please check and try again.');
+              return;
+            }
+            google.script.run.withSuccessHandler(() => {
+              alert('✅ Config updated!');
+            }).setProperties(updated);
+          }).validateCalendarId(updated.CALENDAR_ID);
+        } else {
+          google.script.run.withSuccessHandler(() => {
+            alert('✅ Config updated!');
+          }).setProperties(updated);
+        }
+      }
+    </script>
+  </body>
+</html>
+<button onclick="resetDefaults()">🔁 Reset to Defaults</button>
+<script>
+  function resetDefaults() {
+    if (confirm('Are you sure you want to reset all config values to defaults?')) {
+      google.script.run.withSuccessHandler(() => {
+        alert('✅ Config reset to defaults.');
+        location.reload();
+      }).resetToDefaults();
+    }
+  }
+</script>
+

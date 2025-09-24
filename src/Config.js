@@ -1,99 +1,117 @@
 /**
- * Configuration Manager - Validates and provides access to configuration
+ * Configuration Manager - Loads, validates, and defaults per-user sync settings
  */
 class ConfigurationManager {
-    constructor() {
-        this.config = this.loadAndValidateConfig();
+  constructor() {
+    this.config = this.loadConfig();
+    this.validateConfig(this.config);
+  }
+
+  loadConfig() {
+    const props = PropertiesService.getUserProperties();
+    const defaults = ConfigurationManager.getDefaultConfig();
+
+    return {
+      CALENDAR_ID: props.getProperty('CALENDAR_ID') || defaults.CALENDAR_ID,
+      ERROR_EMAIL: props.getProperty('ERROR_EMAIL') || Session.getActiveUser().getEmail(),
+      DRY_RUN: props.getProperty('DRY_RUN') === 'true',
+
+      TOGGL: {
+        ENABLED: props.getProperty('TOGGL_ENABLED') !== 'false',
+        API_TOKEN: props.getProperty('TOGGL_API_TOKEN') || '',
+        WORKSPACE_ID: props.getProperty('TOGGL_WORKSPACE_ID') || '',
+        TAG_CALENDAR_MAP: this.parseJsonProperty(props.getProperty('TOGGL_TAG_CALENDAR_MAP')),
+        PROJECT_CALENDAR_MAP: this.parseJsonProperty(props.getProperty('TOGGL_PROJECT_CALENDAR_MAP')),
+      },
+
+      GOOGLE_FIT: {
+        ENABLED: props.getProperty('GOOGLE_FIT_ENABLED') !== 'false',
+        SOURCE_ID: props.getProperty('GOOGLE_FIT_SOURCE') || '',
+      }
+    };
+  }
+
+  static getDefaultConfig() {
+    return {
+      CALENDAR_ID: '',
+      ERROR_EMAIL: '',
+      DRY_RUN: false,
+      TOGGL_ENABLED: true,
+      GOOGLE_FIT_ENABLED: true,
+      TOGGL_TAG_CALENDAR_MAP: '{}',
+      TOGGL_PROJECT_CALENDAR_MAP: '{}'
+    };
+  }
+
+  parseJsonProperty(value) {
+    try {
+      return value ? JSON.parse(value) : {};
+    } catch (e) {
+      console.warn('Invalid JSON in config:', value);
+      return {};
     }
+  }
 
-    loadAndValidateConfig() {
-        const config = {
-            CALENDAR_ID: 'hirutbelhu@gmail.com',
-            DAYS_TO_SYNC: 7,
-            MAX_RETRIES: 3,
-            RETRY_DELAY_MS: 1000,
-            BATCH_SIZE: 50,
-            NOTIFY_ON_ERROR: true,
-            ERROR_EMAIL: Session.getActiveUser().getEmail(),
-            DRY_RUN: false, // Set to true to preview changes without modifying calendar
+  validateConfig(config) {
+    const missing = [];
 
-            TOGGL: {
-                ENABLED: true,
-                COLOR: CalendarApp.EventColor.ORANGE,
-                API_TOKEN: this.getSecureProperty('TOGGL_API_TOKEN'),
-                WORKSPACE_ID: this.getSecureProperty('TOGGL_WORKSPACE_ID'),
-                INCLUDE_PROJECT_IN_TITLE: true,
-                INCLUDE_TAGS_IN_TITLE: true,
-                INCLUDE_NOTES_IN_DESCRIPTION: true,
-                TAG_CALENDAR_MAP: {}, // e.g., { "urgent": "urgent@group.calendar.google.com" }
-                PROJECT_CALENDAR_MAP: {}, // e.g., { "Client Work": "client@group.calendar.google.com" }
-                FILTER_BY_TAGS: [], // Only sync entries with these tags if specified
-                RATE_LIMIT_MS: 100,
-                MIN_DURATION_MINUTES: 0, // Skip entries shorter than this
-            },
+    if (!config.CALENDAR_ID) missing.push('CALENDAR_ID');
+    if (config.TOGGL.ENABLED && !config.TOGGL.API_TOKEN) missing.push('TOGGL_API_TOKEN');
+    if (config.GOOGLE_FIT.ENABLED && !config.GOOGLE_FIT.SOURCE_ID) missing.push('GOOGLE_FIT_SOURCE');
 
-            GOOGLE_FIT: {
-                ENABLED: true,
-                COLOR: CalendarApp.EventColor.BLUE,
-                RATE_LIMIT_MS: 50,
-                SYNC_STEPS: {
-                    ENABLED: true,
-                    COLOR: CalendarApp.EventColor.BLUE,
-                    MIN_STEPS_TO_SYNC: 1000,
-                },
-                SYNC_SLEEP: {
-                    ENABLED: true,
-                    COLOR: CalendarApp.EventColor.PALE_BLUE,
-                    MIN_DURATION_HOURS: 1, // Skip sleep sessions shorter than this
-                },
-                SYNC_WORKOUTS: {
-                    ENABLED: true,
-                    COLOR: CalendarApp.EventColor.GREEN,
-                    MIN_DURATION_MINUTES: 5, // Skip workouts shorter than this
-                },
-                SYNC_HEART_RATE: {
-                    ENABLED: true,
-                    COLOR: CalendarApp.EventColor.RED,
-                    DATA_TYPE_NAME: 'com.google.heart_rate.summary',
-                },
-                SYNC_WEIGHT: {
-                    ENABLED: true,
-                    COLOR: CalendarApp.EventColor.GRAY,
-                    DATA_TYPE_NAME: 'com.google.weight.summary',
-                },
-            },
-        };
-
-        // Validate critical configuration
-        if (!config.CALENDAR_ID) {
-            throw new Error('CALENDAR_ID is required');
-        }
-
-        // Only validate Toggl credentials if Toggl is enabled
-        if (config.TOGGL.ENABLED && (!config.TOGGL.API_TOKEN || !config.TOGGL.WORKSPACE_ID)) {
-            console.warn(
-                'Toggl is enabled but credentials are missing. Toggl sync will be skipped.'
-            );
-            config.TOGGL.ENABLED = false;
-        }
-
-        return config;
+    if (missing.length > 0) {
+      console.error('Missing required config fields:', missing.join(', '));
+      throw new Error('Missing required config: ' + missing.join(', '));
     }
-
-    getSecureProperty(key) {
-        try {
-            const value = PropertiesService.getUserProperties().getProperty(key);
-            if (!value && key.includes('TOKEN')) {
-                console.warn(`Missing secure property: ${key}`);
-            }
-            return value;
-        } catch (e) {
-            console.error(`Error accessing property ${key}: ${e.toString()}`);
-            return null;
-        }
-    }
-
-    get() {
-        return this.config;
-    }
+  }
 }
+
+/**
+ * Dashboard Integration Helpers
+ */
+function getUserConfig() {
+  const props = PropertiesService.getUserProperties();
+  return {
+    CALENDAR_ID: props.getProperty('CALENDAR_ID') || '',
+    TOGGL_API_TOKEN: props.getProperty('TOGGL_API_TOKEN') || '',
+    TOGGL_WORKSPACE_ID: props.getProperty('TOGGL_WORKSPACE_ID') || '',
+    GOOGLE_FIT_SOURCE: props.getProperty('GOOGLE_FIT_SOURCE') || '',
+    ERROR_EMAIL: props.getProperty('ERROR_EMAIL') || Session.getActiveUser().getEmail(),
+    DRY_RUN: props.getProperty('DRY_RUN') || 'false',
+    TOGGL_ENABLED: props.getProperty('TOGGL_ENABLED') || 'true',
+    GOOGLE_FIT_ENABLED: props.getProperty('GOOGLE_FIT_ENABLED') || 'true',
+    TOGGL_TAG_CALENDAR_MAP: props.getProperty('TOGGL_TAG_CALENDAR_MAP') || '{}',
+    TOGGL_PROJECT_CALENDAR_MAP: props.getProperty('TOGGL_PROJECT_CALENDAR_MAP') || '{}'
+  };
+}
+
+function saveUserConfig(config) {
+  const props = PropertiesService.getUserProperties();
+  Object.keys(config).forEach(key => props.setProperty(key, config[key]));
+}
+
+function resetUserConfig() {
+  PropertiesService.getUserProperties().deleteAllProperties();
+}
+
+function validateCalendarId(id) {
+  try {
+    const cal = CalendarApp.getCalendarById(id);
+    return cal !== null;
+  } catch (e) {
+    return false;
+  }
+}
+function setupRequiredConfig() {
+  const props = PropertiesService.getUserProperties();
+
+  // Calendar ID: usually your Gmail address or a secondary calendar ID
+  props.setProperty('CALENDAR_ID', 'your-calendar-id@group.calendar.google.com');
+
+  // Google Fit source: adjust to the data source your GoogleFitSource expects
+  props.setProperty(
+    'GOOGLE_FIT_SOURCE',
+    'derived:com.google.step_count.delta:com.google.android.gms:estimated_steps'
+  );
+}
+
